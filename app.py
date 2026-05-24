@@ -13,6 +13,8 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+with app.app_context():
+    init_db()
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
 # --- Database Connection ---
@@ -244,4 +246,4 @@ def dashboard():
 # --- Run ---
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True)
+    app.run(debug=False)
