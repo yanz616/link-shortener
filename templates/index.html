@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkShort — URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6366f1;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .short-url {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #6366f1;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            background: #334155;
+        }
+
+        .error {
+            color: #f87171;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        /* Links Table */
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #1e293b;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #1e293b;
+        }
+
+        .badge {
+            background: #334155;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            color: #06b6d4;
+        }
+
+        .del-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background: #7f1d1d;
+            border-radius: 8px;
+        }
+
+        .del-btn:hover {
+            background: #991b1b;
+            opacity: 1;
+        }
+
+        a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .empty {
+            color: #475569;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .refresh-btn {
+            float: right;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            background: #334155;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>⚡ LinkShort</h1>
+    <p class="subtitle">
+        Shorten URL kamu dalam sekejap &nbsp;·&nbsp;
+        <a href="/dashboard" style="color:#6366f1;">📊 Dashboard</a>
+    </p>
+
+    <!-- Shorten Card -->
+    <div class="card">
+        <div class="input-row">
+            <input type="text" id="urlInput" placeholder="https://contoh.com/url-panjang-banget..." />
+            <button id="shortenBtn" onclick="shortenUrl()">Shorten</button>
+        </div>
+
+        <!-- Tambahan custom code input -->
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+            <span style="color: #94a3b8; font-size: 0.9rem; white-space: nowrap;">
+                localhost:5000/
+            </span>
+            <input type="text" id="customCode" placeholder="custom-code (opsional)"
+                style="flex:1; padding: 10px 14px; font-size: 0.9rem;" />
+        </div>
+        <p style="color: #475569; font-size: 0.78rem; margin-top: 6px;">
+            💡 Kosongkan untuk generate otomatis
+        </p>
+
+        <div class="error" id="errorMsg"></div>
+        <div class="result" id="result">
+            <label>Short URL kamu:</label><br />
+            <span class="short-url" id="shortUrl"></span><br />
+            <button class="copy-btn" onclick="copyUrl()">📋 Copy URL</button>
+        </div>
+    </div>
+
+    <!-- All Links Card -->
+    <div class="card">
+        <h2>📋 Semua Link <button class="refresh-btn" onclick="loadLinks()">🔄 Refresh</button></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Short URL</th>
+                    <th>Original URL</th>
+                    <th>Clicks</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="linksTable">
+                <tr>
+                    <td colspan="4" class="empty">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const BASE = "http://localhost:5000";
+
+        async function shortenUrl() {
+            const input = document.getElementById("urlInput");
+            const customInput = document.getElementById("customCode");
+            const btn = document.getElementById("shortenBtn");
+            const error = document.getElementById("errorMsg");
+            const result = document.getElementById("result");
+            const url = input.value.trim();
+            const customCode = customInput.value.trim();
+
+            error.classList.remove("show");
+            result.classList.remove("show");
+            if (!url) {
+                showError("URL tidak boleh kosong!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Loading...";
+            try {
+                const res = await fetch(`${BASE}/shorten`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, custom_code: customCode })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showError(data.error || "Terjadi kesalahan.");
+                    return;
+                }
+
+                document.getElementById("shortUrl").textContent = data.short_url;
+                result.classList.add("show");
+                input.value = "";
+                customInput.value = "";
+                loadLinks();
+
+            } catch (e) {
+                showError("Tidak bisa konek ke server.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Shorten";
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById("errorMsg");
+            el.textContent = msg;
+            el.classList.add("show");
+        }
+
+        function copyUrl() {
+            const url = document.getElementById("shortUrl").textContent;
+            navigator.clipboard.writeText(url);
+            alert("✅ URL berhasil di-copy!");
+        }
+
+        async function loadLinks() {
+            const tbody = document.getElementById("linksTable");
+            try {
+                const res = await fetch(`${BASE}/links`);
+                const data = await res.json();
+
+                if (!data.length) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty">Belum ada link.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(l => `
+          <tr>
+            <td><a href="${l.short_url}" target="_blank">${l.short_url}</a></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              <a href="${l.original_url}" target="_blank">${l.original_url}</a>
+            </td>
+            <td><span class="badge">👆 ${l.clicks}</span></td>
+            <td><button class="del-btn" onclick="deleteLink('${l.code}')">🗑</button></td>
+          </tr>
+        `).join("");
+
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="empty">Gagal load data.</td></tr>`;
+            }
+        }
+
+        async function deleteLink(code) {
+            if (!confirm(`Hapus link /${code}?`)) return;
+            await fetch(`${BASE}/delete/${code}`, { method: "DELETE" });
+            loadLinks();
+        }
+
+        // Enter key support
+        document.getElementById("urlInput").addEventListener("keydown", e => {
+            if (e.key === "Enter") shortenUrl();
+        });
+
+        // Load on start
+        loadLinks();
+    </script>
+</body>
+
+</html>
