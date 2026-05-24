@@ -31,6 +31,18 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    cur.execute("""
+        ALTER TABLE links ADD COLUMN IF NOT EXISTS custom BOOLEAN DEFAULT FALSE
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS click_logs (
+            id         SERIAL PRIMARY KEY,
+            code       VARCHAR(10) NOT NULL,
+            clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            referrer   TEXT,
+            user_agent TEXT
+        )
+    """)
     conn.commit()
     cur.close()
     conn.close()
