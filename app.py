@@ -13,8 +13,6 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-with app.app_context():
-    init_db()
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
 # --- Database Connection ---
@@ -37,6 +35,8 @@ def init_db():
     cur.close()
     conn.close()
 
+with app.app_context():
+    init_db()
 # --- Helper ---
 def generate_code(length=6):
     chars = string.ascii_letters + string.digits
